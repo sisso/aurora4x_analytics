@@ -9,4 +9,5 @@ edition = "2018"
 [dependencies]
 rusqlite = "0.14"
 time = "0.1"
+chrono = "0.4.15"
 error-chain = "0.12.4"
