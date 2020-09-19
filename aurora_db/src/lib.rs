@@ -1,7 +1,7 @@
 use chrono::{NaiveDate, NaiveDateTime};
 use rusqlite::{Connection, Error as SQLError, OpenFlags};
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use time::Timespec;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -77,8 +77,8 @@ pub struct AuroraDb {
 }
 
 impl AuroraDb {
-    pub fn new(path: PathBuf) -> Self {
-        AuroraDb { path }
+    pub fn new(path: &Path) -> Self {
+        AuroraDb { path: path.into() }
     }
 
     pub fn fetch(&self) -> Result<Data, DbError> {

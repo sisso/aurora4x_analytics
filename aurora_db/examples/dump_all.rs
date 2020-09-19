@@ -10,7 +10,7 @@ fn main() {
         panic!("file {:?} not found", path.canonicalize());
     }
 
-    let db = AuroraDb::new(path);
+    let db = AuroraDb::new(&path);
     let data = db.fetch().unwrap();
 
     for game in data.games {
