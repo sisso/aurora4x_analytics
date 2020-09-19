@@ -1,11 +1,8 @@
 extern crate rusqlite;
 extern crate time;
-extern crate error_chain;
 
-use std::path::PathBuf;
 use aurora_db::*;
-
-mod aurora_db;
+use std::path::PathBuf;
 
 fn main() {
     let path = PathBuf::from("/home/sisso/games/aurora11/AuroraDB.db");
@@ -14,8 +11,11 @@ fn main() {
     }
 
     let db = AuroraDb::new(path);
-    println!("{:?}", db.fetch());
+    let data = db.fetch().unwrap();
 
+    for game in data.games {
+        println!("{}", serde_json::to_string_pretty(&game).unwrap());
+    }
 
     println!("done");
 }
