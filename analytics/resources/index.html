@@ -1,0 +1,118 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<script>
+window.onload = function () {
+
+// value per date per locaiton per resource
+var dataCsv = "date	id	place	Fuel	Maintenance	Pop	Duranium	Neutronium	Corbomite	Tritanium	Boronide	Mercassium	Vendarite	Sorium	Corundium	Gallicite\n"+
+"19.05.2021  4214	Earth	10399551.5380775	218086.626014401	915.134161549585	56140.068825104	26762.0163159956	49239.1662039828	106355.681696804	27540.7424742466	48387.7353500764	63121.0922740441	79813.3172165472	69716.521520193	24661.7697219617\n"
+
+var data = dataCsv.split("\n").map(line => {
+  return line.split("\t");
+});
+
+console.log(data);
+
+var options = {
+	animationEnabled: true,
+	theme: "light2",
+	title:{
+		text: "Actual vs Projected Sales"
+	},
+	axisX:{
+		valueFormatString: "DD MMM"
+	},
+	axisY: {
+		title: "Value",
+		suffix: "",
+		minimum: 30
+	},
+	toolTip:{
+		shared:true
+	},
+	legend:{
+		cursor:"pointer",
+		verticalAlign: "bottom",
+		horizontalAlign: "left",
+		dockInsidePlotArea: true,
+		itemclick: toogleDataSeries
+	},
+	data: [{
+		type: "line",
+		showInLegend: true,
+		name: "Value",
+		markerType: "square",
+		xValueFormatString: "DD MMM, YYYY",
+		color: "#F08080",
+		yValueFormatString: "#,##0K",
+		dataPoints: [
+			{ x: new Date(2017, 10, 1), y: 63 },
+			{ x: new Date(2017, 10, 2), y: 69 },
+			{ x: new Date(2017, 10, 3), y: 65 },
+			{ x: new Date(2017, 10, 4), y: 70 },
+			{ x: new Date(2017, 10, 5), y: 71 },
+			{ x: new Date(2017, 10, 6), y: 65 },
+			{ x: new Date(2017, 10, 7), y: 73 },
+			{ x: new Date(2017, 10, 8), y: 96 },
+			{ x: new Date(2017, 10, 9), y: 84 },
+			{ x: new Date(2017, 10, 10), y: 85 },
+			{ x: new Date(2017, 10, 11), y: 86 },
+			{ x: new Date(2017, 10, 12), y: 94 },
+			{ x: new Date(2017, 10, 13), y: 97 },
+			{ x: new Date(2017, 10, 14), y: 86 },
+			{ x: new Date(2017, 10, 15), y: 89 }
+		]
+	}]
+};
+
+/*
+  games[]
+   - population
+     - value per date
+
+  game[0][1] = { field: "population", "data": [ x: {}, y: {} ] }
+*/
+
+var raw_data_text = $("#input").text();
+var raw_data = JSON.parse(raw_data_text).games[0];
+$('body').append(JSON.stringify(raw_data));
+
+for (var j = 3 ; j < data[0].length ; j ++) {
+  var header = data[0][j];
+  var date = new Date(2017, 10, 1);
+
+  var points = [];
+  for (var i = 1 ; i < data.length ; i ++) {
+    points.push({ x: date, y: data[i][j] });
+  }
+
+  options.data[0].dataPoints = points;
+
+  $('body').append('<div id="chartContainer_'+header+'" style="height: 370px; width: 100%;"></div>');
+  options.title.text = header;
+  $("#chartContainer_"+header).CanvasJSChart(options);
+}
+
+function toogleDataSeries(e){
+	if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+		e.dataSeries.visible = false;
+	} else{
+		e.dataSeries.visible = true;
+	}
+	e.chart.render();
+}
+
+}
+</script>
+</head>
+<body>
+<h1>Report</h1>
+<script src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
+<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>
+<textarea id="input">
+  {"games":[{"game":{"game_id":36,"game_name":"15","game_time":702761550.0,"start_year":2000,"last_viewed":1.0},"race_id":201,"populations":[{"population_id":4214,"pop_name":"Earth","fuel_stockpile":16862118.5951389,"maintenance_stockpile":211409.980247876,"population":928.796227689049,"duranium":58843.1943247614,"neutronium":26579.7526641806,"corbomite":50817.1049703451,"tritanium":105197.830199474,"boronide":27881.6052224116,"mercassium":48763.0619496578,"vendarite":64416.6381099649,"sorium":77480.9107076279,"corundium":68778.0822550485,"gallicite":25699.1757810059},{"population_id":4217,"pop_name":"Mars","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":11.7557090453846,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":0.0,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":0.0,"gallicite":0.0},{"population_id":4218,"pop_name":"Esteves Ventures Limited","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":0.0,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":0.0,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":0.0,"gallicite":0.0},{"population_id":4219,"pop_name":"Horta Precious Metals","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":0.0,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":0.0,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":0.0,"gallicite":0.0},{"population_id":4826,"pop_name":"Vieira Company","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":0.0,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":0.0,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":0.0,"gallicite":0.0},{"population_id":4225,"pop_name":"Luna","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":14.8880040967345,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":0.0,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":0.0,"gallicite":0.0},{"population_id":4241,"pop_name":"2006 QH181 - Neutronion Mines","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":0.0,"duranium":0.0,"neutronium":592.18363242009,"corbomite":0.0,"tritanium":0.0,"boronide":0.0,"mercassium":0.0,"vendarite":592.18363242009,"sorium":0.0,"corundium":0.0,"gallicite":0.0},{"population_id":4246,"pop_name":"Tempel 1 - Mercasium Mines","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":0.0,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":0.0,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":0.0,"gallicite":0.0},{"population_id":4251,"pop_name":"Tempel-Tuttle - Verdanite Mines","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":0.0,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":0.0,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":0.0,"gallicite":0.0},{"population_id":4252,"pop_name":"1996 TL66 - Corodium Mines","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":0.0,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":0.0,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":0.0,"gallicite":0.0},{"population_id":4253,"pop_name":"Epsilon Indi-A II","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":2.40498502223275,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":0.0,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":0.0,"gallicite":0.0},{"population_id":4257,"pop_name":"Aguilar Corporation","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":0.0,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":0.0,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":0.0,"gallicite":0.0},{"population_id":4267,"pop_name":"Proxima Centauri-A IV - Moon 16","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":0.064558808102215,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":0.0,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":0.0,"gallicite":0.0},{"population_id":4268,"pop_name":"Camargo Mining Corporation","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":0.0,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":0.0,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":0.0,"gallicite":0.0},{"population_id":4269,"pop_name":"Proxima Centauri-A II","fuel_stockpile":0.0,"maintenance_stockpile":9565.41780606178,"population":1.41728481867377,"duranium":2.95952427783098,"neutronium":20.7166699448168,"corbomite":2.95952427783098,"tritanium":0.0,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":0.0,"gallicite":0.0},{"population_id":4507,"pop_name":"Ramos Mining Corporation","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":0.0,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":0.0,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":0.0,"gallicite":0.0},{"population_id":4508,"pop_name":"Neptune","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":0.0,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":0.0,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":0.0,"gallicite":0.0},{"population_id":4509,"pop_name":"Arca Resources Group","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":0.0,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":0.0,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":0.0,"gallicite":0.0},{"population_id":4510,"pop_name":"Herschel-Rigollet","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":0.0,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":560.195251141552,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":392.136675799088,"gallicite":0.0},{"population_id":4511,"pop_name":"Swift-Tuttle","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":0.0,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":297.218558092339,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":254.758764079148,"corundium":0.0,"gallicite":0.0},{"population_id":4512,"pop_name":"Whipple","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":0.0,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":0.0,"boronide":579.178392694063,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":0.0,"gallicite":579.178392694063},{"population_id":4513,"pop_name":"C/2017 K2","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":0.0,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":0.0,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":0.0,"gallicite":337.32599695586},{"population_id":4670,"pop_name":"Leite Precious Metals","fuel_stockpile":0.0,"maintenance_stockpile":0.0,"population":0.0,"duranium":0.0,"neutronium":0.0,"corbomite":0.0,"tritanium":0.0,"boronide":0.0,"mercassium":0.0,"vendarite":0.0,"sorium":0.0,"corundium":0.0,"gallicite":0.0}]}]}
+</textarea>
+</body>
+</html>

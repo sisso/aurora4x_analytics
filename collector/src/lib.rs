@@ -21,7 +21,7 @@ pub fn collect(cfg: CollectorCfg) -> Result<(), CollectorError> {
     })
 }
 
-fn append_output(db_path: &str, output_path: &str) -> Result<(), CollectorError> {
+pub fn append_output(db_path: &str, output_path: &str) -> Result<(), CollectorError> {
     let aurora_db = AuroraDb::new(&PathBuf::from(db_path));
     let data = aurora_db.fetch().unwrap();
 
