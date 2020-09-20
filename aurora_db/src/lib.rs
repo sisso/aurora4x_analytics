@@ -1,8 +1,6 @@
-use chrono::{NaiveDate, NaiveDateTime};
 use rusqlite::{Connection, Error as SQLError, OpenFlags};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
-use time::Timespec;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FCTGame {
@@ -55,15 +53,15 @@ pub struct FCTPopulation {
 // }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct GameData {
+pub struct AuroraGameData {
     pub game: FCTGame,
     pub race_id: u32,
     pub populations: Vec<FCTPopulation>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Data {
-    pub games: Vec<GameData>,
+pub struct AuroraData {
+    pub games: Vec<AuroraGameData>,
 }
 
 #[derive(Debug)]
@@ -81,7 +79,7 @@ impl AuroraDb {
         AuroraDb { path: path.into() }
     }
 
-    pub fn fetch(&self) -> Result<Data, DbError> {
+    pub fn fetch(&self) -> Result<AuroraData, DbError> {
         let flags = OpenFlags::SQLITE_OPEN_READ_ONLY;
         let connection =
             Connection::open_with_flags(self.path.as_path(), flags).expect("fail to open database");
@@ -133,13 +131,13 @@ where RaceID = ?"#;
                 .collect::<Result<Vec<_>, _>>()
                 .unwrap();
 
-            games_data.push(GameData {
+            games_data.push(AuroraGameData {
                 game,
                 race_id,
                 populations,
             });
         }
 
-        Ok(Data { games: games_data })
+        Ok(AuroraData { games: games_data })
     }
 }

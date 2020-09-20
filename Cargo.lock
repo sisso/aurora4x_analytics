@@ -3,6 +3,13 @@
 [[package]]
 name = "analytics"
 version = "0.1.0"
+dependencies = [
+ "aurora_db",
+ "chrono",
+ "serde",
+ "serde_json",
+ "time",
+]
 
 [[package]]
 name = "aurora_db"
