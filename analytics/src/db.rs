@@ -13,8 +13,8 @@ pub struct Db {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HistoricalValue {
-    date: f64,
-    value: f64,
+    x: f64,
+    y: f64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -135,7 +135,7 @@ impl DbData {
             Some(f) => f,
         };
 
-        f.historical.push(HistoricalValue { date: date, value });
+        f.historical.push(HistoricalValue { x: date, y: value });
     }
 }
 
@@ -210,7 +210,7 @@ mod test {
             db_data.games[0].populations[0]
                 .get_field("population")
                 .historical[0]
-                .value,
+                .y,
             3.0
         );
     }
