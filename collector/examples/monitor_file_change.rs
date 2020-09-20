@@ -11,7 +11,7 @@ fn main() {
 
     collect(CollectorCfg {
         db_path: path.to_string(),
-        output_path: "/tmp/01.log".to_string(),
+        output_path: "data/aurora_dump.json".to_string(),
     })
     .unwrap();
 }
