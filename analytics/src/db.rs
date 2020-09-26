@@ -7,31 +7,29 @@ use std::io::BufRead;
 pub enum DbError {}
 
 #[derive(Debug)]
-pub struct DashboardDb {
-    path: String,
-}
+pub struct DashboardDb {}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HistoricalValue {
-    x: f64,
-    y: f64,
+    pub x: f64,
+    pub y: f64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct FieldDbData {
-    name: String,
-    historical: Vec<HistoricalValue>,
+pub struct DashboardField {
+    pub name: String,
+    pub historical: Vec<HistoricalValue>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct PopulationDbData {
-    population_id: u32,
-    population_name: String,
-    fields: Vec<FieldDbData>,
+pub struct DashboardPopulation {
+    pub population_id: u32,
+    pub population_name: String,
+    pub fields: Vec<DashboardField>,
 }
 
-impl PopulationDbData {
-    pub fn get_field(&self, name: &str) -> &FieldDbData {
+impl DashboardPopulation {
+    pub fn get_field(&self, name: &str) -> &DashboardField {
         self.fields
             .iter()
             .find(|f| f.name.as_str() == name)
@@ -40,35 +38,35 @@ impl PopulationDbData {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct GameDbData {
-    game_id: u32,
-    game_name: String,
-    populations: Vec<PopulationDbData>,
+pub struct GameDashboard {
+    pub game_id: u32,
+    pub game_name: String,
+    pub populations: Vec<DashboardPopulation>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct DbData {
-    games: Vec<GameDbData>,
+pub struct Dashboard {
+    pub games: Vec<GameDashboard>,
 }
 
-impl DbData {
+impl Dashboard {
     pub fn new() -> Self {
-        DbData { games: Vec::new() }
+        Dashboard { games: Vec::new() }
     }
 }
 
-impl DbData {
+impl Dashboard {
     pub fn append(&mut self, adata: &AuroraData) {
         for agame in &adata.games {
             let date = agame.game.game_time;
 
-            let game_data: &mut GameDbData = match self
+            let game_data: &mut GameDashboard = match self
                 .games
                 .iter_mut()
                 .find(|g| g.game_id == agame.game.game_id)
             {
                 None => {
-                    self.games.push(GameDbData {
+                    self.games.push(GameDashboard {
                         game_id: agame.game.game_id,
                         game_name: agame.game.game_name.clone(),
                         populations: vec![],
@@ -81,13 +79,13 @@ impl DbData {
             };
 
             for ap in &agame.populations {
-                let pop: &mut PopulationDbData = match game_data
+                let pop: &mut DashboardPopulation = match game_data
                     .populations
                     .iter_mut()
                     .find(|i| i.population_id == ap.population_id)
                 {
                     None => {
-                        game_data.populations.push(PopulationDbData {
+                        game_data.populations.push(DashboardPopulation {
                             population_id: ap.population_id,
                             population_name: ap.pop_name.clone(),
                             fields: vec![],
@@ -101,7 +99,7 @@ impl DbData {
 
                 macro_rules! append_field {
                     ($f:tt) => {
-                        DbData::append_field(pop, date, std::stringify!($f), ap.$f);
+                        Dashboard::append_field(pop, date, std::stringify!($f), ap.$f);
                     };
                 };
 
@@ -122,20 +120,20 @@ impl DbData {
         }
     }
 
-    fn append_field(pop: &mut PopulationDbData, date: f64, fieldname: &str, value: f64) {
-        let f: &mut FieldDbData = match pop.fields.iter_mut().find(|i| i.name.as_str() == fieldname)
-        {
-            None => {
-                pop.fields.push(FieldDbData {
-                    name: fieldname.to_string(),
-                    historical: vec![],
-                });
+    fn append_field(pop: &mut DashboardPopulation, date: f64, fieldname: &str, value: f64) {
+        let f: &mut DashboardField =
+            match pop.fields.iter_mut().find(|i| i.name.as_str() == fieldname) {
+                None => {
+                    pop.fields.push(DashboardField {
+                        name: fieldname.to_string(),
+                        historical: vec![],
+                    });
 
-                pop.fields.last_mut().unwrap()
-            }
+                    pop.fields.last_mut().unwrap()
+                }
 
-            Some(f) => f,
-        };
+                Some(f) => f,
+            };
 
         // horrible sorting after insert, but will be noticed?
         f.historical.push(HistoricalValue { x: date, y: value });
@@ -145,22 +143,22 @@ impl DbData {
 }
 
 impl DashboardDb {
-    pub fn load(path: &str) -> Result<Self, DbError> {
-        Ok(DashboardDb {
-            path: path.to_string(),
-        })
-    }
-
-    pub fn get_data(&self) -> Result<DbData, DbError> {
-        let mut db_data = DbData::new();
-
-        let file = File::open(&self.path).unwrap();
+    pub fn load_aurora_dump(path: &str) -> Result<Dashboard, DbError> {
+        // TODO: add error handling
+        let mut db_data = Dashboard::new();
+        let file = File::open(&path).unwrap();
         for line in std::io::BufReader::new(file).lines() {
             let data: AuroraData = serde_json::from_str(&line.unwrap()).unwrap();
             db_data.append(&data);
         }
-
         Ok(db_data)
+    }
+
+    pub fn save(dashboard: &Dashboard, path: &str) -> Result<(), DbError> {
+        // TODO: add error handling
+        let json = serde_json::to_string_pretty(dashboard).unwrap();
+        std::fs::write(path, json).unwrap();
+        Ok(())
     }
 }
 
@@ -201,14 +199,12 @@ mod test {
 
     #[test]
     fn dbdata_append_test() {
-        let mut db_data = DbData::new();
+        let mut db_data = Dashboard::new();
         let aurora_data = AuroraData {
             games: vec![game_data(1.0)],
         };
 
         db_data.append(&aurora_data);
-
-        println!("{}", serde_json::to_string_pretty(&db_data).unwrap());
 
         assert_eq!(db_data.games.len(), 1);
         assert_eq!(db_data.games[0].game_id, 0);
@@ -227,7 +223,7 @@ mod test {
 
     #[test]
     fn dbdata_should_keep_historical_data_sorted_by_time() {
-        let mut db_data = DbData::new();
+        let mut db_data = Dashboard::new();
         let aurora_data = AuroraData {
             games: vec![game_data(5.0), game_data(1.0), game_data(3.0)],
         };

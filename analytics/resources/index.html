@@ -7,7 +7,34 @@
 <script>
 $(document).ready(function() {
 
-function loadData(data) {
+function toogleDataSeries(e){
+    // if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+    //     e.dataSeries.visible = false;
+    // } else{
+    //     e.dataSeries.visible = true;
+    // }
+    // e.chart.render();
+}
+
+function getGames(callback) {
+  $.ajax("/games").success(function(data, status, wtf) {
+      callback(data);
+  });
+}
+
+function getPopulations(gameId, callback) {
+  $.ajax("/games/"+gameId+"/populations").success(function(data, status, wtf) {
+      callback(data);
+  });
+}
+
+function getPopulation(gameId, populationId, callback) {
+  $.ajax("/games/"+gameId+"/populations/"+populationId).success(function(data, status, wtf) {
+      callback(data);
+  });
+}
+
+function updatePopulation(pop) {
     var options = {
         animationEnabled: true,
         theme: "light2",
@@ -61,88 +88,67 @@ function loadData(data) {
     };
 
     chart_id = 0;
-
     function add_field(field) {
-        $('body').append(`<h3>${field.name}<h3>`);
-        // var name = field.name;
-        // var historical = field.historical;
-        // historical[]{.x .y}
-        // var date = new Date(2017, 10, 1);
-        // var points = [];
-        // for (var i = 1 ; i < data.length ; i ++) {
-        //   points.push({ x: date, y: data[i][j] });
-        // }
+        $('#pop_data').append(`<h3>${field.name}<h3>`);
 
         options.data[0].dataPoints = field.historical;
         options.title.text = field.name;
-        $('body').append('<div id="chart_'+chart_id+'" style="height: 370px; width: 100%;"></div>');
+
+        $('#pop_data').append('<div id="chart_'+chart_id+'" style="height: 370px; width: 100%;"></div>');
         $("#chart_"+chart_id).CanvasJSChart(options);
 
         chart_id ++;
     }
 
-    function add_pop(pop) {
-        $('body').append(`<h2>Population: ${pop.population_id}<h2>`);
-        pop.fields.forEach(add_field);
-    }
-
-    function add_game(game) {
-        $('body').append(`<h1>Game: ${game.game_name}<h1>`);
-        game.populations.forEach(add_pop);
-    }
-
-    data.games.forEach(add_game);
-
-//    data.games.forEach(game => {
-//
-//        game.populations.forEach(population => {
-//            population.fields.forEach(field => {
-//            });
-//        });
-//    });
-
-
-    // for (var igame = 0 ; i < data.game.length ; igame ++) {
-    // }
-
-    // for (var j = 3 ; j < data[0].length ; j ++) {
-    //   var header = data[0][j];
-    //   var date = new Date(2017, 10, 1);
-
-    //   var points = [];
-    //   for (var i = 1 ; i < data.length ; i ++) {
-    //     points.push({ x: date, y: data[i][j] });
-    //   }
-
-    //   options.data[0].dataPoints = points;
-
-    //   $('body').append('<div id="chartContainer_'+header+'" style="height: 370px; width: 100%;"></div>');
-    //   options.title.text = header;
-    //   $("#chartContainer_"+header).CanvasJSChart(options);
-    // }
-
-    function toogleDataSeries(e){
-        if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
-            e.dataSeries.visible = false;
-        } else{
-            e.dataSeries.visible = true;
-        }
-        e.chart.render();
-    }
+    $('#pop_data').html("");
+    pop.fields.forEach(add_field);
 }
 
-$.ajax("/data").success(function(data, status, wtf) {
-    var json = JSON.stringify(data);
-    $("#input").text(json);
-    loadData(data);
+function onGameSelected() {
+  var gameId = $('#select_games').val();
+  getPopulations(gameId, populations => {
+    populations.forEach(pop => {
+      $("#select_populations").append('<option value="'+pop.id+'">'+pop.name+'</option>');
+    });
+
+    onPopSelected();
+  });
+}
+
+function onPopSelected() {
+  var gameId = $('#select_games').val();
+  var popId = $('#select_populations').val();
+
+  $('#pop_data').html("Loading..");
+  getPopulation(gameId, popId, pop => {
+      updatePopulation(pop);
+  });
+}
+
+$('#select_games').on('change', onGameSelected);
+$('#select_populations').on('change', onGameSelected);
+
+getGames(games => {
+  games.forEach(game => {
+    $("#select_games").append('<option value="'+game.id+'">'+game.name+'</option>');
+  });
+
+  onGameSelected();
 });
+
+// $.ajax("/data").success(function(data, status, wtf) {
+//     var json = JSON.stringify(data);
+//     $("#input").text(json);
+//     loadData(data);
+// });
 
 });
 </script>
 </head>
 <body>
 <h1>Report</h1>
-<textarea id="input">{}
-</textarea>
+<label>Game</label><select id="select_games"></select>
+<label>Population</label><select id="select_populations"></select>
+<div id="pop_data">Loading...</div>
 </body>
 </html>

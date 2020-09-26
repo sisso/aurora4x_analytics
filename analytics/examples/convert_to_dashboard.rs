@@ -1,8 +1,6 @@
-use analytics::db::DashboardDb;
+use analytics::db::{Dashboard, DashboardDb};
 
 fn main() {
-    let db = DashboardDb::load(&"data/aurora_dump.json").unwrap();
-
-    let json = serde_json::to_string_pretty(&db.get_data().unwrap()).unwrap();
-    std::fs::write("data/dashboard_data.json", json).unwrap();
+    let dashboard = DashboardDb::load_aurora_dump(&"data/aurora_dump.json").unwrap();
+    DashboardDb::save(&dashboard, "data/dashboard_data.json").unwrap();
 }
