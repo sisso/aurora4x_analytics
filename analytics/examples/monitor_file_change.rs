@@ -2,7 +2,7 @@ use crate::collector::CollectorCfg;
 use analytics::collector;
 
 fn main() {
-    let path = "/home/sisso/games/aurora11/AuroraDBSaveBackup.db";
+    let path = "/home/sisso/games/aurora11/AuroraDB.db";
 
     println!("monitoring {}", path);
 

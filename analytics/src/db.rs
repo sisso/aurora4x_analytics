@@ -7,7 +7,7 @@ use std::io::BufRead;
 pub enum DbError {}
 
 #[derive(Debug)]
-pub struct Db {
+pub struct DashboardDb {
     path: String,
 }
 
@@ -144,9 +144,9 @@ impl DbData {
     }
 }
 
-impl Db {
+impl DashboardDb {
     pub fn load(path: &str) -> Result<Self, DbError> {
-        Ok(Db {
+        Ok(DashboardDb {
             path: path.to_string(),
         })
     }
