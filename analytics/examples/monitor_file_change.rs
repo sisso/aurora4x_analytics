@@ -1,4 +1,5 @@
-use collector::{collect, CollectorCfg};
+use crate::collector::CollectorCfg;
+use analytics::collector;
 use notify::{watcher, RecursiveMode, Watcher};
 use std::path::Path;
 use std::sync::mpsc::channel;
@@ -9,7 +10,7 @@ fn main() {
 
     println!("monitoring {}", path);
 
-    collect(CollectorCfg {
+    collector::collect(CollectorCfg {
         db_path: path.to_string(),
         output_path: "data/aurora_dump.json".to_string(),
     })

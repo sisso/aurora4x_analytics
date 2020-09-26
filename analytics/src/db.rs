@@ -1,4 +1,4 @@
-use aurora_db::{AuroraData, AuroraGameData};
+use crate::aurora_db::{AuroraData, AuroraGameData};
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::BufRead;
@@ -162,7 +162,7 @@ impl Db {
 #[cfg(test)]
 mod test {
     use super::*;
-    use aurora_db::{FCTGame, FCTPopulation};
+    use crate::aurora_db::{FCTGame, FCTPopulation};
 
     #[test]
     fn dbdata_append_test() {

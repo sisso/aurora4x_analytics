@@ -1,9 +1,10 @@
-use aurora_db::*;
+use crate::aurora_db::*;
 use notify::{watcher, DebouncedEvent, RecursiveMode, Watcher};
 use std::fs::{File, OpenOptions};
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use std::sync::mpsc::channel;
+use std::thread::sleep;
 use std::time::Duration;
 
 #[derive(Clone, Debug)]
@@ -59,7 +60,11 @@ where
 
     loop {
         match rx.recv() {
-            Ok(DebouncedEvent::NoticeWrite(_)) => callback(),
+            Ok(DebouncedEvent::NoticeWrite(_)) => {
+                // lets wait some time after the notification to check if we have access
+                sleep(Duration::from_secs(1));
+                callback()
+            }
             Ok(_) => {}
             Err(e) => println!("watch error: {:?}", e),
         }

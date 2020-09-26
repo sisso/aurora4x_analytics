@@ -1,7 +1,7 @@
 extern crate rusqlite;
 extern crate time;
 
-use aurora_db::*;
+use analytics::aurora_db::AuroraDb;
 use std::path::PathBuf;
 
 fn main() {
