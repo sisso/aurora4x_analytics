@@ -1,4 +1,4 @@
-use crate::aurora_db::{AuroraData, AuroraGameData};
+use crate::aurora_db::AuroraData;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::BufRead;
@@ -26,6 +26,7 @@ pub struct FieldDbData {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PopulationDbData {
     population_id: u32,
+    population_name: String,
     fields: Vec<FieldDbData>,
 }
 
@@ -88,6 +89,7 @@ impl DbData {
                     None => {
                         game_data.populations.push(PopulationDbData {
                             population_id: ap.population_id,
+                            population_name: ap.pop_name.clone(),
                             fields: vec![],
                         });
 
@@ -135,7 +137,10 @@ impl DbData {
             Some(f) => f,
         };
 
+        // horrible sorting after insert, but will be noticed?
         f.historical.push(HistoricalValue { x: date, y: value });
+        f.historical
+            .sort_unstable_by(|a, b| a.x.partial_cmp(&b.x).unwrap());
     }
 }
 
@@ -162,39 +167,43 @@ impl Db {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::aurora_db::{FCTGame, FCTPopulation};
+    use crate::aurora_db::{AuroraGameData, FCTGame, FCTPopulation};
+
+    fn game_data(time: f64) -> AuroraGameData {
+        AuroraGameData {
+            game: FCTGame {
+                game_id: 0,
+                game_name: "Game 01".to_string(),
+                game_time: time,
+                start_year: 2,
+                last_viewed: 1.0,
+            },
+            race_id: 4,
+            populations: vec![FCTPopulation {
+                population_id: 1,
+                pop_name: "Pop 1".to_string(),
+                fuel_stockpile: 1.0,
+                maintenance_stockpile: 2.0,
+                population: 3.0,
+                duranium: 4.0,
+                neutronium: 5.0,
+                corbomite: 6.0,
+                tritanium: 7.0,
+                boronide: 8.0,
+                mercassium: 9.0,
+                vendarite: 10.0,
+                sorium: 11.0,
+                corundium: 11.0,
+                gallicite: 12.0,
+            }],
+        }
+    }
 
     #[test]
     fn dbdata_append_test() {
         let mut db_data = DbData::new();
         let aurora_data = AuroraData {
-            games: vec![AuroraGameData {
-                game: FCTGame {
-                    game_id: 0,
-                    game_name: "Game 01".to_string(),
-                    game_time: 1.0,
-                    start_year: 2,
-                    last_viewed: 1.0,
-                },
-                race_id: 4,
-                populations: vec![FCTPopulation {
-                    population_id: 1,
-                    pop_name: "Pop 1".to_string(),
-                    fuel_stockpile: 1.0,
-                    maintenance_stockpile: 2.0,
-                    population: 3.0,
-                    duranium: 4.0,
-                    neutronium: 5.0,
-                    corbomite: 6.0,
-                    tritanium: 7.0,
-                    boronide: 8.0,
-                    mercassium: 9.0,
-                    vendarite: 10.0,
-                    sorium: 11.0,
-                    corundium: 11.0,
-                    gallicite: 12.0,
-                }],
-            }],
+            games: vec![game_data(1.0)],
         };
 
         db_data.append(&aurora_data);
@@ -205,6 +214,7 @@ mod test {
         assert_eq!(db_data.games[0].game_id, 0);
         assert_eq!(db_data.games[0].game_name, "Game 01".to_string());
         assert_eq!(db_data.games[0].populations.len(), 1);
+        assert_eq!(db_data.games[0].populations[0].population_name, "Pop 1");
         assert_eq!(db_data.games[0].populations[0].fields.len(), 13);
         assert_eq!(
             db_data.games[0].populations[0]
@@ -212,6 +222,34 @@ mod test {
                 .historical[0]
                 .y,
             3.0
+        );
+    }
+
+    #[test]
+    fn dbdata_should_keep_historical_data_sorted_by_time() {
+        let mut db_data = DbData::new();
+        let aurora_data = AuroraData {
+            games: vec![game_data(5.0), game_data(1.0), game_data(3.0)],
+        };
+
+        db_data.append(&aurora_data);
+        assert_eq!(
+            db_data.games[0].populations[0].fields[0].historical.len(),
+            3
+        );
+
+        let historical = &db_data.games[0].populations[0].fields[0].historical;
+        assert!(
+            (historical[0].x - 1.0).abs() < 0.1,
+            format!("fail at {}", historical[0].x)
+        );
+        assert!(
+            (historical[1].x - 3.0).abs() < 0.1,
+            format!("fail at {}", historical[1].x)
+        );
+        assert!(
+            (historical[2].x - 5.0).abs() < 0.1,
+            format!("fail at {}", historical[2].x)
         );
     }
 }

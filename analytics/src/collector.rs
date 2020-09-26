@@ -1,8 +1,8 @@
 use crate::aurora_db::*;
 use notify::{watcher, DebouncedEvent, RecursiveMode, Watcher};
-use std::fs::{File, OpenOptions};
+use std::fs::OpenOptions;
 use std::io::prelude::*;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::mpsc::channel;
 use std::thread::sleep;
 use std::time::Duration;

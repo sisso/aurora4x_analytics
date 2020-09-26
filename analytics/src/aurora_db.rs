@@ -1,4 +1,4 @@
-use rusqlite::{Connection, Error as SQLError, OpenFlags};
+use rusqlite::{Connection, OpenFlags};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 

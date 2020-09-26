@@ -4,9 +4,6 @@
 extern crate rocket;
 
 use rocket::response::content;
-use serde_json::json;
-use std::fs::File;
-use std::io::Read;
 
 #[get("/")]
 fn index() -> Result<content::Html<String>, std::io::Error> {
