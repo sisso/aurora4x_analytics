@@ -47,7 +47,7 @@ function updatePopulation(pop) {
         axisY: {
             title: "Value",
             suffix: "",
-            minimum: 30
+            minimum: 0
         },
         toolTip:{
             shared:true
@@ -56,8 +56,7 @@ function updatePopulation(pop) {
             cursor:"pointer",
             verticalAlign: "bottom",
             horizontalAlign: "left",
-            dockInsidePlotArea: true,
-            itemclick: toogleDataSeries
+            dockInsidePlotArea: true
         },
         data: [{
             type: "line",
@@ -89,6 +88,18 @@ function updatePopulation(pop) {
 
     chart_id = 0;
     function add_field(field) {
+        var allZero = true;
+
+        for (var i = 0 ; i < field.historical.length ; i ++) {
+            if (field.historical[i].y > 0) {
+                allZero = false;
+                break;
+            }
+        }
+
+        if (allZero)
+            return;
+
         $('#pop_data').append(`<h3>${field.name}<h3>`);
 
         options.data[0].dataPoints = field.historical;
@@ -107,6 +118,7 @@ function updatePopulation(pop) {
 function onGameSelected() {
   var gameId = $('#select_games').val();
   getPopulations(gameId, populations => {
+    $("#select_populations").empty();
     populations.forEach(pop => {
       $("#select_populations").append('<option value="'+pop.id+'">'+pop.name+'</option>');
     });
@@ -126,8 +138,10 @@ function onPopSelected() {
 }
 
 $('#select_games').on('change', onGameSelected);
-$('#select_populations').on('change', onGameSelected);
+$('#select_populations').on('change', onPopSelected);
+$('#button_reload').click(onPopSelected);
 
+$("#select_games").empty();
 getGames(games => {
   games.forEach(game => {
     $("#select_games").append('<option value="'+game.id+'">'+game.name+'</option>');
@@ -149,6 +163,7 @@ getGames(games => {
 <h1>Report</h1>
 <label>Game</label><select id="select_games"></select>
 <label>Population</label><select id="select_populations"></select>
+<button id="button_reload">Reload</button>
 <div id="pop_data">Loading...</div>
 </body>
 </html>

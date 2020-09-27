@@ -1,4 +1,5 @@
 use crate::aurora_db::*;
+use crate::db::DashboardDb;
 use notify::{watcher, DebouncedEvent, RecursiveMode, Watcher};
 use std::fs::OpenOptions;
 use std::io::prelude::*;
@@ -10,7 +11,8 @@ use std::time::Duration;
 #[derive(Clone, Debug)]
 pub struct CollectorCfg {
     pub db_path: String,
-    pub output_path: String,
+    pub dump_path: String,
+    pub dashboard_path: String,
 }
 
 #[derive(Debug)]
@@ -18,7 +20,8 @@ pub enum CollectorError {}
 
 pub fn collect(cfg: CollectorCfg) -> Result<(), CollectorError> {
     watch(&cfg.db_path, || {
-        append_output(&cfg.db_path, &cfg.output_path).unwrap();
+        append_output(&cfg.db_path, &cfg.dump_path).unwrap();
+        convert_into_dashboard(&cfg.dump_path, &cfg.dashboard_path).unwrap();
     })
 }
 
@@ -40,6 +43,12 @@ pub fn append_output(db_path: &str, output_path: &str) -> Result<(), CollectorEr
 
     println!("data updated at {}", output_path);
 
+    Ok(())
+}
+
+pub fn convert_into_dashboard(dump_path: &str, dashboard_path: &str) -> Result<(), CollectorError> {
+    let dashboard = DashboardDb::load_aurora_dump(dump_path).unwrap();
+    DashboardDb::save(&dashboard, dashboard_path).unwrap();
     Ok(())
 }
 
