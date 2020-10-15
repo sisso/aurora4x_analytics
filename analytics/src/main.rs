@@ -3,7 +3,7 @@
 #[macro_use]
 extern crate rocket;
 
-use analytics::db::Dashboard;
+use analytics::dashboard::Dashboard;
 use rocket::response::content;
 use serde::{Deserialize, Serialize};
 

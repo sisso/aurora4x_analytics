@@ -1,5 +1,5 @@
 use crate::aurora_db::*;
-use crate::db::DashboardDb;
+use crate::dashboard::DashboardDb;
 use notify::{watcher, DebouncedEvent, RecursiveMode, Watcher};
 use std::fs::OpenOptions;
 use std::io::prelude::*;
@@ -71,7 +71,7 @@ where
         match rx.recv() {
             Ok(DebouncedEvent::NoticeWrite(_)) => {
                 // lets wait some time after the notification to check if we have access
-                sleep(Duration::from_secs(1));
+                sleep(Duration::from_secs(10));
                 callback()
             }
             Ok(_) => {}

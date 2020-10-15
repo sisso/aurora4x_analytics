@@ -41,6 +41,7 @@ impl DashboardPopulation {
 pub struct GameDashboard {
     pub game_id: u32,
     pub game_name: String,
+    pub fields: Vec<DashboardField>,
     pub populations: Vec<DashboardPopulation>,
 }
 
@@ -69,6 +70,7 @@ impl Dashboard {
                     self.games.push(GameDashboard {
                         game_id: agame.game.game_id,
                         game_name: agame.game.game_name.clone(),
+                        fields: vec![],
                         populations: vec![],
                     });
 
@@ -165,9 +167,9 @@ impl DashboardDb {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::aurora_db::{AuroraGameData, FCTGame, FCTPopulation};
+    use crate::aurora_db::{AuroraGameData, FCTGame, FCTMineralDeposit, FCTPopulation, FCTRace};
 
-    fn game_data(time: f64) -> AuroraGameData {
+    fn game_data_old(time: f64) -> AuroraGameData {
         AuroraGameData {
             game: FCTGame {
                 game_id: 0,
@@ -179,6 +181,8 @@ mod test {
             race_id: 4,
             populations: vec![FCTPopulation {
                 population_id: 1,
+                system_id: None,
+                system_body_id: None,
                 pop_name: "Pop 1".to_string(),
                 fuel_stockpile: 1.0,
                 maintenance_stockpile: 2.0,
@@ -192,8 +196,61 @@ mod test {
                 vendarite: 10.0,
                 sorium: 11.0,
                 corundium: 11.0,
+                uridium: None,
                 gallicite: 12.0,
+                minerals: None,
             }],
+            race: None,
+        }
+    }
+
+    fn game_data(time: f64) -> AuroraGameData {
+        AuroraGameData {
+            game: FCTGame {
+                game_id: 0,
+                game_name: "Game 01".to_string(),
+                game_time: time,
+                start_year: 2,
+                last_viewed: 1.0,
+            },
+            race_id: 4,
+            populations: vec![FCTPopulation {
+                population_id: 1,
+                system_id: None,
+                system_body_id: None,
+                pop_name: "Pop 1".to_string(),
+                fuel_stockpile: 1.0,
+                maintenance_stockpile: 2.0,
+                population: 3.0,
+                duranium: 4.0,
+                neutronium: 5.0,
+                corbomite: 6.0,
+                tritanium: 7.0,
+                boronide: 8.0,
+                mercassium: 9.0,
+                vendarite: 10.0,
+                sorium: 11.0,
+                corundium: 11.0,
+                uridium: None,
+                gallicite: 12.0,
+                minerals: Some(vec![
+                    FCTMineralDeposit {
+                        material_id: 1,
+                        amount: 43.0,
+                        acc: 0.3,
+                    },
+                    FCTMineralDeposit {
+                        material_id: 2,
+                        amount: 430.0,
+                        acc: 0.8,
+                    },
+                ]),
+            }],
+            race: Some(FCTRace {
+                race_id: 4,
+                wealth: 40.0,
+                annual_wealth: 10.0,
+            }),
         }
     }
 
@@ -225,10 +282,21 @@ mod test {
     fn dbdata_should_keep_historical_data_sorted_by_time() {
         let mut db_data = Dashboard::new();
         let aurora_data = AuroraData {
-            games: vec![game_data(5.0), game_data(1.0), game_data(3.0)],
+            games: vec![game_data_old(5.0), game_data(1.0), game_data(3.0)],
         };
 
         db_data.append(&aurora_data);
+
+        // game fields
+        assert_eq!(db_data.games[0].fields.len(), 2);
+        assert_eq!(db_data.games[0].fields[0].name, "wealth");
+        assert_eq!(db_data.games[0].fields[0].historical.len(), 2);
+        assert_eq!(db_data.games[0].fields[0].historical[0].y, 40.0);
+        assert_eq!(db_data.games[0].fields[0].historical[1].y, 40.0);
+        assert_eq!(db_data.games[0].fields[1].name, "annual_wealth");
+        assert_eq!(db_data.games[0].fields[0].historical.len(), 2);
+
+        // populations
         assert_eq!(
             db_data.games[0].populations[0].fields[0].historical.len(),
             3

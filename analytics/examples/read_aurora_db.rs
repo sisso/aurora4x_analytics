@@ -1,8 +1,8 @@
 use analytics::collector;
 
 fn main() {
-    let output_path = "./01.log";
-    let paths = vec!["/home/sisso/home/shared/aurora11/AuroraDB.db"];
+    let output_path = "./01.json";
+    let paths = vec!["/home/sisso/games/aurora11/AuroraDB.db"];
 
     for path in paths {
         println!("processing {}", path);
