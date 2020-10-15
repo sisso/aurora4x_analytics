@@ -103,6 +103,14 @@ impl Dashboard {
                     ($f:tt) => {
                         Dashboard::append_field(pop, date, std::stringify!($f), ap.$f);
                     };
+                    ($f:tt, option) => {
+                        Dashboard::append_field(
+                            pop,
+                            date,
+                            std::stringify!($f),
+                            ap.$f.unwrap_or(0.0),
+                        );
+                    };
                 };
 
                 append_field!(fuel_stockpile);
@@ -116,6 +124,7 @@ impl Dashboard {
                 append_field!(mercassium);
                 append_field!(vendarite);
                 append_field!(sorium);
+                append_field!(uridium, option);
                 append_field!(corundium);
                 append_field!(gallicite);
             }
@@ -160,6 +169,7 @@ impl DashboardDb {
         // TODO: add error handling
         let json = serde_json::to_string_pretty(dashboard).unwrap();
         std::fs::write(path, json).unwrap();
+        println!("dashboard updated at {}", path);
         Ok(())
     }
 }
