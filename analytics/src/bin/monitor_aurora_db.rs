@@ -4,7 +4,7 @@ use analytics::collector;
 fn main() {
     let path = std::env::args()
         .nth(1)
-        .unwrap_or("/home/sisso/games/aurora11/AuroraDB.db".to_string());
+        .expect("path to aurora 4x must be provided");
 
     println!("monitoring {}", path);
 
