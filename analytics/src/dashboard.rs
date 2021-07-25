@@ -111,7 +111,7 @@ impl Dashboard {
                             ap.$f.unwrap_or(0.0),
                         );
                     };
-                };
+                }
 
                 append_field!(fuel_stockpile);
                 append_field!(maintenance_stockpile);
